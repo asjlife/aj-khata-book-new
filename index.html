@@ -1,40 +1,269 @@
-<!doctype html>
-<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#123c32"><title>AJ KHATA BOOK — AJ DIGITAL POINT</title>
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#14532d">
+<title>AJ KHATA BOOK - AJ DIGITAL POINT</title>
 <style>
-:root{--g:#123c32;--g2:#176344;--bg:#f2f6f3;--ink:#18372c;--muted:#52665b;--line:#dce5df;--red:#b42318}*{box-sizing:border-box}body{font-family:system-ui,Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}header{background:linear-gradient(130deg,var(--g),var(--g2));color:white;padding:22px 16px;border-radius:0 0 20px 20px}header h1{margin:0 0 4px;font-size:24px}header p{margin:0;font-size:13px;opacity:.9}main{max-width:760px;margin:auto;padding:14px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat,.card{background:white;padding:14px;margin:10px 0;border-radius:14px;border:1px solid var(--line);box-shadow:0 2px 8px #123c3208}.stat small{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:17px;margin-top:4px;overflow-wrap:anywhere}input,select,button{box-sizing:border-box;width:100%;padding:12px;margin:5px 0;border-radius:9px;font-size:15px}input,select{border:1px solid #ccd8d0;background:white;color:var(--ink)}button{border:0;background:var(--g2);color:white;font-weight:700;cursor:pointer}button.secondary{background:#e5eee8;color:var(--g)}button.danger{background:#fee4e2;color:var(--red)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.small{color:var(--muted);font-size:12px;line-height:1.5}.person{padding:13px 0;border-bottom:1px solid var(--line)}.person:last-child{border-bottom:0}.person-head{display:flex;justify-content:space-between;gap:8px;align-items:start}.person-name{font-weight:800;font-size:16px}.amount{font-weight:800;color:var(--red);white-space:nowrap}.credit{color:var(--g2)}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.actions button{width:auto;flex:1;min-width:90px;padding:9px;font-size:13px}.entry{padding:11px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.entry:first-child{border-top:0}.entry b{display:block}.entry-amount{font-weight:800;white-space:nowrap}.udhar{color:var(--red)}.jama{color:var(--g2)}.hidden{display:none!important}.empty{text-align:center;padding:18px;color:var(--muted)}h2{font-size:18px;margin:0 0 10px}.search{margin-bottom:8px}footer{text-align:center;padding:18px;color:var(--muted);font-size:11px}@media(max-width:480px){.stats{gap:5px}.stat{padding:9px}.stat strong{font-size:14px}.grid{grid-template-columns:1fr}.person-head{display:block}.person-head .amount{display:block;margin-top:5px}}
-</style></head><body>
-<header><h1>AJ KHATA BOOK</h1><p>AJ DIGITAL POINT · ग्राहक उधार-जमा हिसाब</p></header><main>
-<div class="stats"><div class="stat"><small>कुल ग्राहक</small><strong id="count">0</strong></div><div class="stat"><small>उधार बाकी</small><strong id="total">₹0</strong></div><div class="stat"><small>ग्राहक का अग्रिम</small><strong id="advance">₹0</strong></div></div>
-<section class="card"><h2>नया ग्राहक / ग्राहक विवरण</h2><input id="name" maxlength="80" placeholder="ग्राहक का नाम *"><div class="grid"><input id="phone" maxlength="20" placeholder="मोबाइल नंबर (वैकल्पिक)"><input id="customerNote" maxlength="140" placeholder="पता / नोट (वैकल्पिक)"></div><div class="actions"><button id="saveCustomer" onclick="saveCustomer()">ग्राहक सेव करें</button><button id="cancelEditCustomer" class="secondary hidden" onclick="cancelCustomerEdit()">रद्द करें</button></div><p class="small">किसी ग्राहक के नाम के नीचे “खाता खोलें” दबाकर उसका पूरा हिसाब देखें।</p></section>
-<section class="card"><h2>लेन-देन दर्ज करें</h2><label class="small" for="customer">ग्राहक</label><select id="customer"></select><div class="grid"><div><label class="small" for="type">एंट्री प्रकार</label><select id="type"><option value="udhar">उधार दिया / बिक्री</option><option value="jama">जमा मिला / भुगतान</option></select></div><div><label class="small" for="amount">रकम (₹)</label><input id="amount" type="number" min="0.01" max="100000000" step="0.01" placeholder="0.00"></div></div><div class="grid"><div><label class="small" for="date">तारीख</label><input id="date" type="date"></div><div><label class="small" for="note">विवरण</label><input id="note" maxlength="160" placeholder="जैसे सामान / भुगतान"></div></div><div class="actions"><button id="saveEntry" onclick="saveEntry()">एंट्री सेव करें</button><button id="cancelEditEntry" class="secondary hidden" onclick="cancelEntryEdit()">रद्द करें</button></div><p id="entryMode" class="small">नई एंट्री जोड़ें।</p></section>
-<section class="card"><h2>ग्राहकों का हिसाब</h2><input id="search" class="search" placeholder="नाम या मोबाइल से खोजें…" oninput="renderCustomers()"><div id="list"></div></section>
-<section id="ledgerCard" class="card hidden"><div class="actions" style="margin-top:0"><button class="secondary" onclick="closeLedger()">← सभी ग्राहक</button><button class="secondary" onclick="editCurrentCustomer()">ग्राहक बदलें</button><button class="danger" onclick="deleteCurrentCustomer()">ग्राहक हटाएँ</button></div><h2 id="ledgerName" style="margin-top:12px"></h2><p id="ledgerMeta" class="small"></p><div id="ledgerBalance" style="font-size:21px;font-weight:800;margin:10px 0"></div><h2>लेन-देन इतिहास</h2><div id="history"></div></section>
-<section class="card"><h2>बैकअप / डेटा रिकवरी</h2><p class="small">डेटा इसी मोबाइल/ब्राउज़र में रहता है। ब्राउज़र डेटा मिटाने या फोन बदलने से पहले बैकअप डाउनलोड करें।</p><div class="actions"><button onclick="backup()">JSON बैकअप डाउनलोड</button><button class="secondary" onclick="csvBackup()">CSV हिसाब डाउनलोड</button></div><label class="small" for="importFile">बैकअप फ़ाइल से डेटा वापस लाएँ</label><input id="importFile" type="file" accept=".json,application/json"></section>
-<footer>AJ KHATA BOOK · AJ DIGITAL POINT<br>हर एंट्री सेव करने से पहले रकम और तारीख जाँचें।</footer></main>
+:root{font-family:system-ui,"Noto Sans Devanagari",sans-serif;color:#17231b;background:#f3f7f4}
+*{box-sizing:border-box}
+body{margin:0}
+header{background:#14532d;color:white;padding:20px}
+main{max-width:1000px;margin:auto;padding:14px}
+.card,.stat{background:white;border:1px solid #dce5de;border-radius:13px;padding:15px;margin-bottom:14px}
+h1{margin:0;font-size:27px}h2{font-size:19px;margin:0 0 12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat small{display:block;color:#647067}.stat strong{font-size:22px}
+label{display:block;font-weight:650;margin:10px 0 5px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #cbd5ce;border-radius:8px;font:inherit;background:white}
+button{background:#166534;color:white;border:0;border-radius:8px;padding:10px 12px;font:inherit;font-weight:650;cursor:pointer;margin:4px 3px 4px 0}
+.secondary{background:#e8f2eb;color:#14532d}.danger{background:#fee2e2;color:#991b1b}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.customer{padding:12px;border:1px solid #dce5de;border-radius:10px;margin:9px 0;background:#fff}
+.muted{color:#647067;font-size:13px}.balance{font-weight:750;color:#14532d}
+table{width:100%;border-collapse:collapse;min-width:530px}
+th,td{padding:8px;border-bottom:1px solid #dce5de;text-align:left;vertical-align:top}
+th{background:#edf4ee}.tablewrap{overflow-x:auto}
+.hidden{display:none!important}
+.notice{background:#fff7df;padding:11px;border-radius:8px;font-size:13px;margin:12px 0}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.stat{padding:10px}}
+@media print{
+ body *{visibility:hidden!important}
+ #printArea,#printArea *{visibility:visible!important}
+ #printArea{display:block!important;position:absolute;left:0;top:0;width:100%;padding:0}
+ @page{size:A4;margin:14mm}
+}
+</style>
+</head>
+<body>
+<header>
+ <h1>AJ KHATA BOOK</h1>
+ <div>AJ DIGITAL POINT · ग्राहक उधार-जमा हिसाब</div>
+</header>
+<main>
+ <div class="stats">
+  <div class="stat"><small>कुल ग्राहक</small><strong id="count">0</strong></div>
+  <div class="stat"><small>उधार बाकी</small><strong id="due">₹0.00</strong></div>
+  <div class="stat"><small>ग्राहक का अग्रिम</small><strong id="advance">₹0.00</strong></div>
+ </div>
+ <div class="notice">आपका डेटा इसी ब्राउज़र में रहता है। फोन बदलने या ब्राउज़र डेटा मिटाने से पहले JSON बैकअप डाउनलोड करें। PDF के लिए प्रिंट स्क्रीन में “Save as PDF” चुनें।</div>
+ <div class="grid">
+  <section class="card">
+   <h2 id="cfTitle">नया ग्राहक / ग्राहक विवरण</h2>
+   <form id="cf">
+    <label>ग्राहक का नाम *</label><input id="cn" required maxlength="100">
+    <label>मोबाइल नंबर (वैकल्पिक)</label><input id="cp" inputmode="tel" maxlength="20">
+    <label>पता / नोट</label><textarea id="cnote" maxlength="500"></textarea>
+    <button id="csave">ग्राहक सेव करें</button>
+    <button type="button" class="secondary hidden" id="ccancel">रद्द करें</button>
+   </form>
+  </section>
+  <section class="card">
+   <h2 id="efTitle">लेन-देन दर्ज करें</h2>
+   <form id="ef">
+    <label>ग्राहक</label><select id="ec" required></select>
+    <label>एंट्री प्रकार</label>
+    <select id="et">
+     <option value="credit">उधार दिया / बिक्री</option>
+     <option value="payment">ग्राहक से जमा / भुगतान मिला</option>
+     <option value="advance">ग्राहक का अग्रिम जमा</option>
+     <option value="advance_return">अग्रिम वापस किया</option>
+    </select>
+    <label>रकम (₹)</label><input id="ea" type="number" min="0.01" step="0.01" required>
+    <label>तारीख</label><input id="ed" type="date" required>
+    <label>विवरण</label><input id="enote" maxlength="250" placeholder="जैसे सामान / भुगतान">
+    <button id="esave">एंट्री सेव करें</button>
+    <button type="button" class="secondary hidden" id="ecancel">रद्द करें</button>
+   </form>
+  </section>
+ </div>
+ <section class="card">
+  <h2>ग्राहकों का हिसाब</h2>
+  <label>नाम या मोबाइल से खोजें</label><input id="search" placeholder="ग्राहक खोजें…">
+  <div id="customers"></div>
+ </section>
+ <section class="card hidden" id="account">
+  <button type="button" class="secondary" id="close">खाता बंद करें</button>
+  <h2 id="accountTitle">ग्राहक खाता</h2>
+  <div id="summary"></div>
+  <button id="statement">PDF स्टेटमेंट / प्रिंट</button>
+  <button class="secondary" id="customerCsv">इस ग्राहक का CSV</button>
+  <h3>लेन-देन इतिहास</h3>
+  <div id="history"></div>
+ </section>
+ <section class="card">
+  <h2>बैकअप / डेटा रिकवरी</h2>
+  <button id="backup">JSON बैकअप डाउनलोड</button>
+  <button id="csv" class="secondary">CSV हिसाब डाउनलोड</button>
+  <label>बैकअप फ़ाइल से डेटा वापस लाएँ</label><input id="restore" type="file" accept=".json,application/json">
+ </section>
+</main>
+<footer style="text-align:center;padding:12px" class="muted">AJ KHATA BOOK · AJ DIGITAL POINT</footer>
+<section id="printArea" class="hidden"></section>
 <script>
-const KEY='AJ_KHATA_BOOK_NEW';let db={customers:[],entries:[]},editingCustomer=null,editingEntry=null,currentLedger=null;
-try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&Array.isArray(saved.customers)&&Array.isArray(saved.entries))db=saved;}catch(e){}
-function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function escapeText(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function money(n){return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(Number(n)||0)}function paise(n){return Math.round((Number(n)||0)*100)}
-function balance(id){return db.entries.filter(e=>e.customerId===id).reduce((s,e)=>s+(e.type==='udhar'?paise(e.amount):-paise(e.amount)),0)/100}function makeId(){return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('मोबाइल स्टोरेज उपलब्ध नहीं है। तुरंत बैकअप लें।')}renderAll()}
-function saveCustomer(){const name=document.getElementById('name').value.trim();if(!name)return alert('ग्राहक का नाम लिखें।');const phone=document.getElementById('phone').value.trim(),note=document.getElementById('customerNote').value.trim();if(editingCustomer){const c=db.customers.find(x=>x.id===editingCustomer);if(!c)return cancelCustomerEdit();Object.assign(c,{name,phone,note})}else db.customers.push({id:makeId(),name,phone,note,createdAt:Date.now()});cancelCustomerEdit();persist()}
-function cancelCustomerEdit(){editingCustomer=null;['name','phone','customerNote'].forEach(id=>document.getElementById(id).value='');document.getElementById('saveCustomer').textContent='ग्राहक सेव करें';document.getElementById('cancelEditCustomer').classList.add('hidden')}
-function editCustomer(id){const c=db.customers.find(x=>x.id===id);if(!c)return;editingCustomer=id;document.getElementById('name').value=c.name;document.getElementById('phone').value=c.phone||'';document.getElementById('customerNote').value=c.note||'';document.getElementById('saveCustomer').textContent='बदलाव सेव करें';document.getElementById('cancelEditCustomer').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
-function saveEntry(){const id=document.getElementById('customer').value,amount=Number(document.getElementById('amount').value),date=document.getElementById('date').value||today();if(!id)return alert('पहले ग्राहक जोड़ें।');if(!Number.isFinite(amount)||amount<=0||amount>100000000)return alert('सही रकम लिखें।');const data={customerId:id,type:document.getElementById('type').value,amount:Math.round(amount*100)/100,date,note:document.getElementById('note').value.trim()};if(editingEntry){const old=db.entries.find(e=>e.id===editingEntry);if(!old)return cancelEntryEdit();Object.assign(old,data)}else db.entries.push(Object.assign({id:makeId(),createdAt:Date.now()},data));cancelEntryEdit();persist()}
-function cancelEntryEdit(){editingEntry=null;document.getElementById('amount').value='';document.getElementById('note').value='';document.getElementById('date').value=today();document.getElementById('saveEntry').textContent='एंट्री सेव करें';document.getElementById('cancelEditEntry').classList.add('hidden');document.getElementById('entryMode').textContent='नई एंट्री जोड़ें।'}
-function editEntry(id){const e=db.entries.find(x=>x.id===id);if(!e)return;editingEntry=id;document.getElementById('customer').value=e.customerId;document.getElementById('type').value=e.type;document.getElementById('amount').value=e.amount;document.getElementById('date').value=e.date||today();document.getElementById('note').value=e.note||'';document.getElementById('saveEntry').textContent='एंट्री बदलाव सेव करें';document.getElementById('cancelEditEntry').classList.remove('hidden');document.getElementById('entryMode').textContent='आप पुरानी एंट्री बदल रहे हैं।';window.scrollTo({top:0,behavior:'smooth'})}
-function deleteEntry(id){if(!confirm('यह लेन-देन हटाएँ? इससे ग्राहक का बैलेंस बदल जाएगा।'))return;db.entries=db.entries.filter(e=>e.id!==id);if(editingEntry===id)cancelEntryEdit();persist()}
-function openLedger(id){currentLedger=id;renderLedger();document.getElementById('ledgerCard').classList.remove('hidden');document.getElementById('ledgerCard').scrollIntoView({behavior:'smooth',block:'start'})}function closeLedger(){currentLedger=null;document.getElementById('ledgerCard').classList.add('hidden')}function editCurrentCustomer(){if(currentLedger)editCustomer(currentLedger)}
-function deleteCurrentCustomer(){const c=db.customers.find(x=>x.id===currentLedger);if(!c)return;if(!confirm('ग्राहक '+c.name+' और उसके सभी लेन-देन हटाएँ? यह वापस नहीं होगा। पहले बैकअप लें।'))return;db.customers=db.customers.filter(x=>x.id!==currentLedger);db.entries=db.entries.filter(e=>e.customerId!==currentLedger);currentLedger=null;persist()}function deleteCustomerById(id){currentLedger=id;deleteCurrentCustomer()}
-function renderStats(){let total=0,advance=0;db.customers.forEach(c=>{const b=paise(balance(c.id));if(b>0)total+=b;else advance-=b});document.getElementById('count').textContent=db.customers.length;document.getElementById('total').textContent=money(total/100);document.getElementById('advance').textContent=money(advance/100)}
-function renderSelect(){const s=document.getElementById('customer'),prev=s.value;s.innerHTML=db.customers.map(c=>'<option value="'+escapeText(c.id)+'">'+escapeText(c.name)+'</option>').join('');if(db.customers.some(c=>c.id===prev))s.value=prev}
-function renderCustomers(){const q=document.getElementById('search').value.trim().toLowerCase(),list=db.customers.filter(c=>(c.name+' '+(c.phone||'')+' '+(c.note||'')).toLowerCase().includes(q));document.getElementById('list').innerHTML=list.length?list.map(c=>{const b=balance(c.id),bal=b>0?money(b)+' बाकी':b<0?money(-b)+' अग्रिम':'हिसाब बराबर';return '<div class="person"><div class="person-head"><div><div class="person-name">'+escapeText(c.name)+'</div><div class="small">'+escapeText(c.phone||'मोबाइल नहीं दिया')+(c.note?' · '+escapeText(c.note):'')+'</div></div><div class="amount '+(b<=0?'credit':'')+'">'+bal+'</div></div><div class="actions"><button onclick="openLedger(\''+escapeText(c.id)+'\')">खाता खोलें</button><button class="secondary" onclick="editCustomer(\''+escapeText(c.id)+'\')">एडिट</button><button class="danger" onclick="deleteCustomerById(\''+escapeText(c.id)+'\')">डिलीट</button></div></div>'}).join(''):'<div class="empty">कोई ग्राहक नहीं मिला। ऊपर से नया ग्राहक जोड़ें।</div>'}
-function renderLedger(){const c=db.customers.find(x=>x.id===currentLedger);if(!c){document.getElementById('ledgerCard').classList.add('hidden');return}const b=balance(c.id);document.getElementById('ledgerName').textContent=c.name;document.getElementById('ledgerMeta').textContent=[c.phone,c.note].filter(Boolean).join(' · ');const bal=document.getElementById('ledgerBalance');bal.textContent=b>0?money(b)+' उधार बाकी':b<0?money(-b)+' ग्राहक का अग्रिम':'हिसाब बराबर';bal.style.color=b>0?'#b42318':'#176344';const es=db.entries.filter(e=>e.customerId===c.id).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))||(b.createdAt||0)-(a.createdAt||0));document.getElementById('history').innerHTML=es.length?es.map(e=>'<div class="entry"><div><b>'+(e.type==='udhar'?'उधार दिया / बिक्री':'जमा मिला / भुगतान')+'</b><div class="small">'+escapeText(e.date||'तारीख नहीं')+(e.note?' · '+escapeText(e.note):'')+'</div><div class="actions"><button class="secondary" onclick="editEntry(\''+escapeText(e.id)+'\')">एडिट</button><button class="danger" onclick="deleteEntry(\''+escapeText(e.id)+'\')">डिलीट</button></div></div><div class="entry-amount '+(e.type==='udhar'?'udhar':'jama')+'">'+(e.type==='udhar'?'+':'−')+money(e.amount)+'</div></div>').join(''):'<div class="empty">इस ग्राहक की अभी कोई एंट्री नहीं है।</div>'}
-function renderAll(){renderStats();renderSelect();renderCustomers();if(currentLedger)renderLedger()}
-function download(name,data,type){const url=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)}function backup(){download('AJ-Khata-Backup.json',JSON.stringify({version:2,exportedAt:new Date().toISOString(),customers:db.customers,entries:db.entries},null,2),'application/json')}
-function csvBackup(){const rows=[['ग्राहक','मोबाइल','तारीख','प्रकार','रकम','विवरण','वर्तमान बैलेंस']];db.entries.forEach(e=>{const c=db.customers.find(x=>x.id===e.customerId)||{};rows.push([c.name||'',c.phone||'',e.date||'',e.type==='udhar'?'उधार':'जमा',e.amount,e.note||'',balance(e.customerId)])});download('AJ-Khata-Hisab.csv','\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n'),'text/csv;charset=utf-8')}
-document.getElementById('importFile').addEventListener('change',async function(ev){const f=ev.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(!Array.isArray(x.customers)||!Array.isArray(x.entries))throw Error('invalid');if(!confirm('मौजूदा हिसाब बदलकर बैकअप लोड करें? पहले वर्तमान बैकअप डाउनलोड कर लें।'))return;db={customers:x.customers,entries:x.entries};cancelCustomerEdit();cancelEntryEdit();currentLedger=null;document.getElementById('ledgerCard').classList.add('hidden');persist();alert('बैकअप लोड हो गया।')}catch(e){alert('यह सही AJ Khata Book बैकअप फ़ाइल नहीं है।')}finally{ev.target.value=''}});
-document.getElementById('date').value=today();renderAll();
-</script></body></html>
+"use strict";
+const $=id=>document.getElementById(id);
+const KEY="AJ_KHATA_BOOK_NEW";
+const today=()=>{let d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const rupees=p=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR"}).format((Number(p)||0)/100);
+const paise=v=>Math.max(0,Math.round(Number(v)*100)||0);
+const dateText=d=>d?d.split("-").reverse().join("/"):"—";
+let data={version:2,customers:[],entries:[]},editingC=null,editingE=null,active=null;
+try{
+ let old=JSON.parse(localStorage.getItem(KEY)||"null");
+ if(old&&Array.isArray(old.customers)){
+  data.customers=old.customers.map(c=>({id:String(c.id||uid()),name:String(c.name||"").trim(),phone:String(c.phone||""),note:String(c.note||""),createdAt:c.createdAt||new Date().toISOString()})).filter(c=>c.name);
+  data.entries=(old.entries||old.transactions||[]).map(e=>({id:String(e.id||uid()),customerId:String(e.customerId||e.customer_id||""),type:["credit","payment","advance","advance_return"].includes(e.type)?e.type:"credit",amountPaise:Number.isInteger(e.amountPaise)?e.amountPaise:paise(e.amount??e.value??0),date:String(e.date||today()).slice(0,10),note:String(e.note||e.description||""),createdAt:e.createdAt||new Date().toISOString()})).filter(e=>e.customerId&&e.amountPaise>0);
+ }
+}catch(e){console.warn("Stored data read error",e)}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function customer(id){return data.customers.find(c=>c.id===id)}
+function entriesFor(id){return data.entries.filter(e=>!id||e.customerId===id).slice().sort((a,b)=>a.date.localeCompare(b.date)||a.createdAt.localeCompare(b.createdAt))}
+function labelType(t){return ({credit:"उधार दिया / बिक्री",payment:"ग्राहक से जमा / भुगतान मिला",advance:"ग्राहक का अग्रिम जमा",advance_return:"अग्रिम वापस किया"})[t]||t}
+function balance(id){
+ let due=0,adv=0;
+ entriesFor(id).forEach(e=>{
+  if(e.type==="credit")due+=e.amountPaise;
+  if(e.type==="payment")due-=e.amountPaise;
+  if(e.type==="advance")adv+=e.amountPaise;
+  if(e.type==="advance_return")adv-=e.amountPaise;
+ });
+ if(due<0){adv+=-due;due=0}
+ if(adv<0){due+=-adv;adv=0}
+ return {due,adv};
+}
+function render(){
+ $("count").textContent=data.customers.length;
+ let due=0,adv=0;
+ data.customers.forEach(c=>{let b=balance(c.id);due+=b.due;adv+=b.adv});
+ $("due").textContent=rupees(due);$("advance").textContent=rupees(adv);
+ let prev=$("ec").value;
+ $("ec").innerHTML=data.customers.length?data.customers.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join(""):'<option value="">पहले ग्राहक जोड़ें</option>';
+ if(data.customers.some(c=>c.id===prev))$("ec").value=prev;
+ if(active&&customer(active))renderAccount();else $("account").classList.add("hidden");
+ let q=$("search").value.trim().toLocaleLowerCase("hi");
+ let list=data.customers.filter(c=>(c.name+" "+c.phone).toLocaleLowerCase("hi").includes(q));
+ $("customers").innerHTML=list.length?list.map(c=>{
+  let b=balance(c.id),text=b.due?rupees(b.due)+" बाकी":b.adv?rupees(b.adv)+" अग्रिम":"खाता बराबर";
+  return `<div class="customer"><b>${esc(c.name)}</b><div class="muted">${esc(c.phone||"मोबाइल नहीं दिया")}</div><div class="balance">${text}</div><button class="secondary" data-a="open" data-id="${esc(c.id)}">खाता खोलें</button><button class="secondary" data-a="editc" data-id="${esc(c.id)}">एडिट</button><button class="danger" data-a="delc" data-id="${esc(c.id)}">डिलीट</button></div>`;
+ }).join(""):'<p class="muted">अभी कोई ग्राहक नहीं मिला।</p>';
+}
+function renderAccount(){
+ let c=customer(active);if(!c){$("account").classList.add("hidden");return}
+ $("account").classList.remove("hidden");$("accountTitle").textContent=c.name+" — खाता";
+ let es=entriesFor(c.id),b=balance(c.id);
+ let cr=es.filter(e=>e.type==="credit").reduce((s,e)=>s+e.amountPaise,0);
+ let pay=es.filter(e=>e.type==="payment").reduce((s,e)=>s+e.amountPaise,0);
+ $("summary").innerHTML=`<p>मोबाइल: ${esc(c.phone||"नहीं दिया")}<br>पता / नोट: ${esc(c.note||"—")}</p><p>कुल उधार: <b>${rupees(cr)}</b><br>कुल भुगतान: <b>${rupees(pay)}</b><br>वर्तमान बाकी: <b>${rupees(b.due)}</b><br>अग्रिम: <b>${rupees(b.adv)}</b></p>`;
+ $("history").innerHTML=es.length?`<div class="tablewrap"><table><thead><tr><th>तारीख</th><th>प्रकार / विवरण</th><th>रकम</th><th>कार्रवाई</th></tr></thead><tbody>${es.slice().reverse().map(e=>`<tr><td>${dateText(e.date)}</td><td>${esc(labelType(e.type))}<br><small>${esc(e.note||"—")}</small></td><td>${rupees(e.amountPaise)}</td><td><button class="secondary" data-a="receipt" data-id="${esc(e.id)}">रसीद PDF</button><button class="secondary" data-a="edite" data-id="${esc(e.id)}">एडिट</button><button class="danger" data-a="dele" data-id="${esc(e.id)}">डिलीट</button></td></tr>`).join("")}</tbody></table></div>`:'<p class="muted">कोई लेन-देन नहीं।</p>';
+}
+$("cf").addEventListener("submit",e=>{
+ e.preventDefault();let name=$("cn").value.trim();if(!name)return;
+ if(editingC){let c=customer(editingC);if(c){c.name=name;c.phone=$("cp").value.trim();c.note=$("cnote").value.trim()}}
+ else data.customers.push({id:uid(),name,phone:$("cp").value.trim(),note:$("cnote").value.trim(),createdAt:new Date().toISOString()});
+ save();resetC();
+});
+function resetC(){editingC=null;$("cf").reset();$("cfTitle").textContent="नया ग्राहक / ग्राहक विवरण";$("csave").textContent="ग्राहक सेव करें";$("ccancel").classList.add("hidden")}
+$("ccancel").onclick=resetC;
+$("ef").addEventListener("submit",e=>{
+ e.preventDefault();let id=$("ec").value,amount=paise($("ea").value);
+ if(!customer(id)){alert("पहले ग्राहक जोड़ें।");return}
+ if(!amount){alert("सही रकम दर्ज करें।");return}
+ let obj={customerId:id,type:$("et").value,amountPaise:amount,date:$("ed").value,note:$("enote").value.trim()};
+ if(editingE){let en=data.entries.find(x=>x.id===editingE);if(en)Object.assign(en,obj)}
+ else data.entries.push({id:uid(),...obj,createdAt:new Date().toISOString()});
+ active=id;save();resetE();
+});
+function resetE(){editingE=null;$("ef").reset();$("ed").value=today();$("efTitle").textContent="लेन-देन दर्ज करें";$("esave").textContent="एंट्री सेव करें";$("ecancel").classList.add("hidden");if(active&&customer(active))$("ec").value=active}
+$("ecancel").onclick=resetE;
+$("search").oninput=render;
+function action(e){
+ let b=e.target.closest("button[data-a]");if(!b)return;
+ let id=b.dataset.id,a=b.dataset.a;
+ if(a==="open"){active=id;renderAccount();$("account").scrollIntoView({behavior:"smooth"});return}
+ if(a==="editc"){
+  let c=customer(id);if(!c)return;editingC=id;$("cn").value=c.name;$("cp").value=c.phone;$("cnote").value=c.note;$("cfTitle").textContent="ग्राहक एडिट करें";$("csave").textContent="बदलाव सेव करें";$("ccancel").classList.remove("hidden");$("cf").scrollIntoView({behavior:"smooth"});return
+ }
+ if(a==="delc"){
+  let c=customer(id);if(!c||!confirm("क्या ग्राहक और उसके सभी लेन-देन हटाने हैं? पहले बैकअप लें।"))return;
+  data.customers=data.customers.filter(x=>x.id!==id);data.entries=data.entries.filter(x=>x.customerId!==id);if(active===id)active=null;save();return
+ }
+ if(a==="edite"){
+  let en=data.entries.find(x=>x.id===id);if(!en)return;editingE=id;active=en.customerId;$("ec").value=en.customerId;$("et").value=en.type;$("ea").value=(en.amountPaise/100).toFixed(2);$("ed").value=en.date;$("enote").value=en.note;$("efTitle").textContent="लेन-देन एडिट करें";$("esave").textContent="बदलाव सेव करें";$("ecancel").classList.remove("hidden");$("ef").scrollIntoView({behavior:"smooth"});return
+ }
+ if(a==="dele"){
+  if(!confirm("क्या यह लेन-देन हटाना है?"))return;data.entries=data.entries.filter(x=>x.id!==id);save();return
+ }
+ if(a==="receipt")printReceipt(id);
+}
+$("customers").onclick=action;$("history").onclick=action;
+$("close").onclick=()=>{active=null;render()};
+function headerPrint(title,c,sub=""){
+ return `<div style="font-family:Arial,'Noto Sans Devanagari',sans-serif;color:#111"><div style="text-align:center;border-bottom:2px solid #166534;padding-bottom:10px"><h1 style="color:#14532d">AJ DIGITAL POINT</h1>AJ KHATA BOOK · ग्राहक उधार-जमा हिसाब</div><h2 style="text-align:center;margin:18px 0">${title}</h2><p><b>ग्राहक:</b> ${esc(c.name)}<br><b>मोबाइल:</b> ${esc(c.phone||"नहीं दिया")}<br><b>पता / नोट:</b> ${esc(c.note||"—")}<br>${sub}</p>`;
+}
+function printPage(html){
+ let area=$("printArea");area.innerHTML=html+"</div>";area.classList.remove("hidden");
+ const cleanup=()=>{area.classList.add("hidden");area.innerHTML="";window.removeEventListener("afterprint",cleanup)};
+ window.addEventListener("afterprint",cleanup);setTimeout(()=>window.print(),150);
+}
+function printStatement(id){
+ let c=customer(id);if(!c)return;let es=entriesFor(id),b=balance(id),due=0,adv=0;
+ let rows=es.map(e=>{
+  if(e.type==="credit")due+=e.amountPaise;
+  if(e.type==="payment")due-=e.amountPaise;
+  if(e.type==="advance")adv+=e.amountPaise;
+  if(e.type==="advance_return")adv-=e.amountPaise;
+  if(due<0){adv+=-due;due=0}if(adv<0){due+=-adv;adv=0}
+  return `<tr><td>${dateText(e.date)}</td><td>${esc(labelType(e.type))}</td><td>${esc(e.note||"—")}</td><td style="text-align:right">${rupees(e.amountPaise)}</td><td style="text-align:right">${rupees(due)}</td><td style="text-align:right">${rupees(adv)}</td></tr>`;
+ }).join("");
+ printPage(headerPrint("ग्राहक खाता स्टेटमेंट",c,"स्टेटमेंट तारीख: "+dateText(today()))+
+ `<table style="width:100%;border-collapse:collapse;font-size:10px"><thead><tr>${["तारीख","प्रकार","विवरण","रकम","बाकी","अग्रिम"].map(x=>`<th style="border:1px solid #aaa;padding:6px;background:#edf4ee">${x}</th>`).join("")}</tr></thead><tbody>${rows||'<tr><td colspan="6">कोई लेन-देन नहीं</td></tr>'}</tbody></table><p style="border:1px solid #aaa;padding:12px"><b>वर्तमान बाकी: ${rupees(b.due)}</b><br>अग्रिम: ${rupees(b.adv)}<br>यह स्टेटमेंट सेव रिकॉर्ड के आधार पर है। कृपया विवरण जाँचें।</p>`);
+}
+function balanceAfter(id,entryId){
+ let due=0,adv=0;
+ for(let e of entriesFor(id)){
+  if(e.type==="credit")due+=e.amountPaise;
+  if(e.type==="payment")due-=e.amountPaise;
+  if(e.type==="advance")adv+=e.amountPaise;
+  if(e.type==="advance_return")adv-=e.amountPaise;
+  if(due<0){adv+=-due;due=0}if(adv<0){due+=-adv;adv=0}
+  if(e.id===entryId)return {due,adv};
+ }
+ return {due,adv};
+}
+function printReceipt(id){
+ let e=data.entries.find(x=>x.id===id);if(!e)return;let c=customer(e.customerId);if(!c)return;let b=balanceAfter(c.id,e.id);
+ printPage(headerPrint("लेन-देन रसीद",c,"रसीद नंबर: "+esc(e.id.slice(-8).toUpperCase())+" · तारीख: "+dateText(e.date))+
+ `<div style="border:1px solid #aaa;padding:18px;margin-top:20px"><div>लेन-देन प्रकार</div><h2>${esc(labelType(e.type))}</h2><div>रकम</div><div style="font-size:28px;font-weight:bold;color:#14532d">${rupees(e.amountPaise)}</div><p><b>विवरण:</b> ${esc(e.note||"—")}</p><hr><b>इस एंट्री के बाद बाकी:</b> ${rupees(b.due)}<br><b>अग्रिम:</b> ${rupees(b.adv)}<p style="margin-top:35px">ग्राहक हस्ताक्षर: _____________ &nbsp;&nbsp; अधिकृत हस्ताक्षर: _____________</p></div>`);
+}
+$("statement").onclick=()=>active&&printStatement(active);
+function downloadBlob(name,blob){let url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200)}
+$("backup").onclick=()=>downloadBlob("aj-khata-backup-"+today()+".json",new Blob([JSON.stringify({...data,exportedAt:new Date().toISOString()},null,2)],{type:"application/json"}));
+function csvDownload(es,name){
+ let rows=[["ग्राहक","मोबाइल","तारीख","प्रकार","रकम (₹)","विवरण"],...es.map(e=>{let c=customer(e.customerId)||{};return[c.name||"",c.phone||"",e.date,labelType(e.type),(e.amountPaise/100).toFixed(2),e.note||""]})];
+ let text="\ufeff"+rows.map(r=>r.map(x=>'"'+String(x??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
+ downloadBlob(name,new Blob([text],{type:"text/csv;charset=utf-8"}));
+}
+$("csv").onclick=()=>csvDownload(entriesFor(),"aj-khata-hisaab-"+today()+".csv");
+$("customerCsv").onclick=()=>{let c=customer(active);if(c)csvDownload(entriesFor(active),"aj-khata-"+c.id+".csv")};
+$("restore").onchange=async e=>{
+ let file=e.target.files&&e.target.files[0];if(!file)return;
+ try{
+  let x=JSON.parse(await file.text());
+  if(!x||!Array.isArray(x.customers)||!Array.isArray(x.entries))throw Error();
+  if(!confirm("मौजूदा डेटा बदल जाएगा। क्या पहले वर्तमान बैकअप ले लिया है?")){e.target.value="";return}
+  data.customers=x.customers.map(c=>({id:String(c.id||uid()),name:String(c.name||"").trim(),phone:String(c.phone||""),note:String(c.note||""),createdAt:c.createdAt||new Date().toISOString()})).filter(c=>c.name);
+  data.entries=x.entries.map(en=>({id:String(en.id||uid()),customerId:String(en.customerId||""),type:["credit","payment","advance","advance_return"].includes(en.type)?en.type:"credit",amountPaise:Number(en.amountPaise)||0,date:String(en.date||today()),note:String(en.note||""),createdAt:en.createdAt||new Date().toISOString()})).filter(en=>customer(en.customerId)&&en.amountPaise>0);
+  active=null;save();resetC();resetE();alert("बैकअप वापस लाया गया।");
+ }catch(err){alert("यह सही AJ KHATA BOOK JSON बैकअप नहीं है।")}
+ e.target.value="";
+};
+$("ed").value=today();
+render();
+</script>
+</body>
+</html>
