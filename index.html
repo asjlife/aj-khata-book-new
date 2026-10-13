@@ -569,4 +569,13 @@ $("shareAccount").onclick=()=>{
 };
 $("statement").onclick=()=>{
  if(active&&customer(active))printPage("ग्राहक स्टेटमेंट",statementHtml(active));
- else alert("पहले ग्राहक का खाता खोलें
+ 
+else alert("पहले ग्राहक का खाता खोलें।");
+};
+
+render();
+$("entryDate").value = today();
+</script>
+</body>
+</html>
+
