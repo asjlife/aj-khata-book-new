@@ -23,6 +23,17 @@
 <a class="active" href="#top">⌂ होम</a><a href="#customerForm">♟ ग्राहक जोड़ें</a><a href="#entryForm">⇄ लेन-देन जोड़ें</a><a href="#customerListPanel">☷ ग्राहक सूची</a><a href="#accountPanel">▤ हिसाब / स्टेटमेंट</a><a href="#accountPanel" id="navWhatsapp">☏ WhatsApp</a><a href="#accountPanel" onclick="window.print()">▣ PDF / प्रिंट</a><a href="#backupPanel">⬇ CSV / बैकअप</a>
 </nav><div class="side-note">📱<br><b>डिजिटल हिसाब</b><br>अब और आसान<br><strong>AJ DIGITAL POINT</strong></div></aside>
 <main class="content" id="top">
+<section class="panel" id="cloudBackupInfo" style="margin:0 0 18px">
+<h2 class="panel-title">☁️ डेटा सुरक्षा और Cloud Sync</h2>
+<div class="panel-body">
+<p style="margin:0 0 10px;line-height:1.6">अभी ग्राहक और लेन-देन इस डिवाइस के ब्राउज़र में सेव होते हैं। Firebase Cloud Sync चालू होने की पुष्टि अभी नहीं हुई है।</p>
+<div class="actions">
+<button class="secondary" id="quickJsonBackup" type="button">⬇ अभी JSON बैकअप लें</button>
+<button class="secondary" id="cloudSetupInfo" type="button">Cloud Sync स्थिति</button>
+</div>
+<p id="cloudInfoStatus" style="font-size:13px;margin:10px 0 0">सुझाव: किसी भी बदलाव से पहले JSON बैकअप डाउनलोड करके सुरक्षित रखें।</p>
+</div>
+</section>
 <section class="stats">
 <div class="stat"><div class="stat-icon">♟</div><div><small>कुल ग्राहक</small><strong id="totalCustomers">0</strong></div></div>
 <div class="stat"><div class="stat-icon">₹</div><div><small>कुल बाकी</small><strong class="red" id="totalDue">₹0.00</strong></div></div>
@@ -93,6 +104,8 @@ $('shareAccount').onclick=()=>{const c=db.customers.find(x=>x.id===selectedId);i
 $('statement').onclick=()=>window.print();
 $('customerCsv').onclick=()=>{const c=db.customers.find(x=>x.id===selectedId);if(!c){alert('पहले ग्राहक चुनें।');return}download('AJ-Khata-'+c.name.replace(/[^\w-]/g,'_')+'.csv',csv([['तारीख','प्रकार','विवरण','राशि'],...entriesFor(c.id).map(e=>[e.date,typeLabel(e.type),e.note,e.amount])]),'text/csv;charset=utf-8')};
 $('filterDates').onclick=()=>{filterOn=true;renderHistory()};$('clearFilter').onclick=()=>{filterOn=false;$('fromDate').value='';$('toDate').value='';renderHistory()};
+$('quickJsonBackup').onclick=()=>download('AJ-KHATA-BOOK-safety-backup-'+today()+'.json',JSON.stringify(db,null,2),'application/json');
+$('cloudSetupInfo').onclick=()=>alert('Cloud Sync अभी चालू नहीं है। Firebase Phone Authentication, Authorized Domain और सुरक्षित Firestore Rules सेट करने के बाद ही क्लाउड सिंक जोड़ा जाएगा।');
 $('backup').onclick=()=>download('AJ-KHATA-BOOK-backup-'+today()+'.json',JSON.stringify(db,null,2),'application/json');
 $('restore').onclick=()=>$('backupFile').click();
 $('backupFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!d||!Array.isArray(d.customers)||!Array.isArray(d.entries))throw Error();if(!confirm('Restore करने से वर्तमान डेटा बदल जाएगा। पहले वर्तमान JSON बैकअप लिया है? जारी रखें?'))return;db=d;if(save()){selectedId=null;render();alert('बैकअप Restore हो गया।')}}catch(err){alert('यह सही AJ KHATA BOOK JSON बैकअप नहीं है।')}finally{e.target.value=''}};
