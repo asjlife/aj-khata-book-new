@@ -26,12 +26,13 @@
 <section class="panel" id="cloudBackupInfo" style="margin:0 0 18px">
 <h2 class="panel-title">☁️ डेटा सुरक्षा और Cloud Sync</h2>
 <div class="panel-body">
-<p style="margin:0 0 10px;line-height:1.6">अभी ग्राहक और लेन-देन इस डिवाइस के ब्राउज़र में सेव होते हैं। Firebase Cloud Sync चालू होने की पुष्टि अभी नहीं हुई है।</p>
-<div class="actions">
-<button class="secondary" id="quickJsonBackup" type="button">⬇ अभी JSON बैकअप लें</button>
-<button class="secondary" id="cloudSetupInfo" type="button">Cloud Sync स्थिति</button>
-</div>
-<p id="cloudInfoStatus" style="font-size:13px;margin:10px 0 0">सुझाव: किसी भी बदलाव से पहले JSON बैकअप डाउनलोड करके सुरक्षित रखें।</p>
+<p style="margin:0 0 10px;line-height:1.6">ग्राहक डेटा पहले इस डिवाइस में सेव होता है। नीचे फोन OTP से साइन-इन करके जरूरत होने पर सुरक्षित क्लाउड बैकअप बना या वापस ला सकते हैं। पहले JSON बैकअप लें।</p>
+<div class="field-grid"><div class="field"><label for="cloudPhone">मोबाइल नंबर देश कोड सहित</label><input id="cloudPhone" inputmode="tel" placeholder="+919876543210" autocomplete="tel"></div><div class="field"><label for="cloudOtp">SMS OTP</label><input id="cloudOtp" inputmode="numeric" autocomplete="one-time-code" placeholder="OTP दर्ज करें"></div></div>
+<div id="recaptcha-container"></div>
+<div class="actions" style="margin:10px 0"><button class="secondary" id="cloudSendOtp" type="button">OTP भेजें</button><button class="secondary" id="cloudVerifyOtp" type="button">OTP सत्यापित करें</button><button class="secondary" id="cloudSignOut" type="button">साइन आउट</button></div>
+<p id="cloudAuthStatus" style="font-size:13px;margin:8px 0">साइन-इन नहीं है।</p>
+<div class="actions"><button class="primary" id="cloudUpload" type="button">☁️ इस डिवाइस का डेटा क्लाउड में बैकअप करें</button><button class="action-blue" id="cloudRestore" type="button">⬇ क्लाउड बैकअप वापस लाएँ</button><button class="secondary" id="quickJsonBackup" type="button">⬇ JSON बैकअप लें</button><button class="secondary" id="cloudSetupInfo" type="button">Cloud Sync मदद</button></div>
+<p id="cloudInfoStatus" style="font-size:13px;margin:10px 0 0">क्लाउड बैकअप और Restore अलग-अलग मैन्युअल कार्रवाइयाँ हैं। Restore स्थानीय डेटा को बदल सकता है।</p>
 </div>
 </section>
 <section class="stats">
@@ -105,7 +106,7 @@ $('statement').onclick=()=>window.print();
 $('customerCsv').onclick=()=>{const c=db.customers.find(x=>x.id===selectedId);if(!c){alert('पहले ग्राहक चुनें।');return}download('AJ-Khata-'+c.name.replace(/[^\w-]/g,'_')+'.csv',csv([['तारीख','प्रकार','विवरण','राशि'],...entriesFor(c.id).map(e=>[e.date,typeLabel(e.type),e.note,e.amount])]),'text/csv;charset=utf-8')};
 $('filterDates').onclick=()=>{filterOn=true;renderHistory()};$('clearFilter').onclick=()=>{filterOn=false;$('fromDate').value='';$('toDate').value='';renderHistory()};
 $('quickJsonBackup').onclick=()=>download('AJ-KHATA-BOOK-safety-backup-'+today()+'.json',JSON.stringify(db,null,2),'application/json');
-$('cloudSetupInfo').onclick=()=>alert('Cloud Sync अभी चालू नहीं है। Firebase Phone Authentication, Authorized Domain और सुरक्षित Firestore Rules सेट करने के बाद ही क्लाउड सिंक जोड़ा जाएगा।');
+$('cloudSetupInfo').onclick=()=>alert('जरूरी सेटिंग: Firebase Authentication में Phone provider चालू करें; Authentication Settings में asjlife.github.io को Authorized domain में जोड़ें; Firestore Rules प्रकाशित हों। Firebase Web App config की apiKey OTP शुरू करते समय माँगी जाएगी। पहले JSON बैकअप लें।');
 $('backup').onclick=()=>download('AJ-KHATA-BOOK-backup-'+today()+'.json',JSON.stringify(db,null,2),'application/json');
 $('restore').onclick=()=>$('backupFile').click();
 $('backupFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!d||!Array.isArray(d.customers)||!Array.isArray(d.entries))throw Error();if(!confirm('Restore करने से वर्तमान डेटा बदल जाएगा। पहले वर्तमान JSON बैकअप लिया है? जारी रखें?'))return;db=d;if(save()){selectedId=null;render();alert('बैकअप Restore हो गया।')}}catch(err){alert('यह सही AJ KHATA BOOK JSON बैकअप नहीं है।')}finally{e.target.value=''}};
@@ -115,6 +116,20 @@ $('navWhatsapp').onclick=e=>{if(!selectedId){e.preventDefault();alert('पहल
 $('todayLabel').textContent=new Date().toLocaleDateString('hi-IN',{day:'numeric',month:'long',year:'numeric'});
 load();$('entryDate').value=today();render();if(db.customers.length)selectCustomer(db.customers[0].id);
 })();
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+const statusEl=document.getElementById('cloudAuthStatus'),infoEl=document.getElementById('cloudInfoStatus'),KEY='AJ_KHATA_BOOK_NEW';
+const setStatus=m=>{if(statusEl)statusEl.textContent=m},setInfo=m=>{if(infoEl)infoEl.textContent=m},$=id=>document.getElementById(id);
+let auth=null,store=null,confirmation=null,verifier=null,currentUser=null,ready=false;
+function ensureFirebase(){if(ready)return true;const apiKey=prompt('Firebase Console → Project settings → General → Your apps → Web app config से apiKey कॉपी करके यहाँ पेस्ट करें। यह केवल इस पेज के लिए इस्तेमाल होगी।');if(!apiKey||!/^AIza[0-9A-Za-z_-]{20,}$/.test(apiKey.trim())){setInfo('Firebase apiKey नहीं मिली या उसका प्रारूप गलत है।');return false}try{const app=initializeApp({apiKey:apiKey.trim(),authDomain:'aj-khata-book.firebaseapp.com',projectId:'aj-khata-book',storageBucket:'aj-khata-book.firebasestorage.app',messagingSenderId:'311167162895',appId:'1:311167162895:web:63a88de42a25d9d73fe17a'});auth=getAuth(app);store=getFirestore(app);ready=true;onAuthStateChanged(auth,u=>{currentUser=u;setStatus(u?'साइन-इन है: '+u.phoneNumber:'साइन-इन नहीं है।')});return true}catch(e){setInfo('Firebase शुरू नहीं हुआ: '+(e.code||e.message));return false}}
+$('cloudSendOtp').onclick=async()=>{if(!ensureFirebase())return;const phone=$('cloudPhone').value.trim();if(!/^\+[1-9]\d{7,14}$/.test(phone)){setInfo('मोबाइल नंबर +91 के साथ सही प्रारूप में भरें।');return}try{if(!verifier)verifier=new RecaptchaVerifier(auth,'recaptcha-container',{});confirmation=await signInWithPhoneNumber(auth,phone,verifier);setInfo('OTP भेजा गया। SMS में आया OTP दर्ज करें।')}catch(e){setInfo('OTP नहीं भेजा गया: '+(e.code||e.message)+'। Phone provider, Authorized domain और SMS quota जाँचें।')}};
+$('cloudVerifyOtp').onclick=async()=>{if(!ensureFirebase())return;if(!confirmation){setInfo('पहले OTP भेजें।');return}try{await confirmation.confirm($('cloudOtp').value.trim());confirmation=null;setInfo('साइन-इन सफल। अब क्लाउड बैकअप कर सकते हैं।')}catch(e){setInfo('OTP सत्यापित नहीं हुआ। OTP जाँचें और दोबारा कोशिश करें.')}};
+$('cloudSignOut').onclick=async()=>{if(!ensureFirebase())return;try{await signOut(auth);setInfo('साइन आउट हो गया।')}catch(e){setInfo('साइन आउट नहीं हो पाया।')}};
+$('cloudUpload').onclick=async()=>{if(!ensureFirebase())return;if(!currentUser){setInfo('पहले OTP से साइन-इन करें।');return}try{const raw=localStorage.getItem(KEY);if(!raw)throw new Error('इस ब्राउज़र में स्थानीय डेटा नहीं मिला।');const data=JSON.parse(raw);if(!data||!Array.isArray(data.customers)||!Array.isArray(data.entries))throw new Error('स्थानीय डेटा का प्रारूप सही नहीं है।');if(!confirm('इस खाते के क्लाउड बैकअप को वर्तमान स्थानीय डेटा से बदलें? पहले JSON बैकअप लें।'))return;await setDoc(doc(store,'users',currentUser.uid,'ledger','main'),{data,updatedAt:serverTimestamp(),schemaVersion:1});setInfo('क्लाउड बैकअप सफल हुआ।')}catch(e){setInfo('क्लाउड बैकअप विफल: '+(e.code||e.message)+'। Firestore Rules और नेटवर्क जाँचें।')}};
+$('cloudRestore').onclick=async()=>{if(!ensureFirebase())return;if(!currentUser){setInfo('पहले OTP से साइन-इन करें।');return}try{const snap=await getDoc(doc(store,'users',currentUser.uid,'ledger','main'));if(!snap.exists()){setInfo('इस खाते में अभी क्लाउड बैकअप नहीं मिला।');return}const d=snap.data()?.data;if(!d||!Array.isArray(d.customers)||!Array.isArray(d.entries))throw new Error('क्लाउड डेटा का प्रारूप सही नहीं है।');if(!confirm('चेतावनी: क्लाउड बैकअप इस डिवाइस के ग्राहक और लेन-देन को बदल देगा। पहले वर्तमान JSON बैकअप डाउनलोड किया है? जारी रखें?'))return;localStorage.setItem(KEY,JSON.stringify(d));setInfo('क्लाउड डेटा डिवाइस में लोड हुआ। सूची अपडेट करने के लिए पेज Refresh करें।')}catch(e){setInfo('क्लाउड Restore विफल: '+(e.code||e.message)+'। Firestore Rules और नेटवर्क जाँचें.')}};
 </script>
 </body>
 </html>
